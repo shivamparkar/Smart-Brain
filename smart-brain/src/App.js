@@ -29,21 +29,32 @@ class App extends Component {
     }
   }
 
+  calculateFaceLocation = (data) => {
+    const clarifaiFace = data.outputs[0].data.regions[0].region_info.bounding_box;
+    const image = document.getElementById('inputimage');
+    const width = Number(image.width);
+    const height = Number(image.height);
+    return {
+      leftCol: clarifaiFace.left_col * width;
+      topRow: clarifaiFace.top_row * height;
+      rightCol: width - (clarifaiFace.rightCol * width)
+    }
+  }
+
   onInputChange = (event) => {
-    console.log(event.target.value);
+    this.setState({input: event.target.value});
+  }
+
+  calculateFaceLocation = (data) => {
+
   }
 
   onButtonSubmit = () => {
+    this.setState({imageUrl: this.state.input});
     console.log('click');
-    app.models.predict("d81cf0fdb9cc4423b3767789f1157433", 'https://samples.clarifai.con/face-det.jpg')
-    .then(
-    function(response){
-      console.log(response);
-    },
-    function(err){
-      
-    }
-    );
+    app.models.predict(Clarifai.FACE_DECTECT_MODEL, this.state.input)
+    .then(response => this.calculateFaceLocation(response))
+    .catch(err => console.log(err));
 }
 
 
@@ -58,7 +69,7 @@ class App extends Component {
      <Rank />
      <ImageLinkForm onInputChange={this.onInputChange} onButoonSubmit={this.onButtonSubmit}
       />
-     <FaceRecognition />  
+     <FaceRecognition imageUrl={this.state.imageUrl}/>  
     </div>
    );
  }

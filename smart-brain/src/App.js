@@ -6,6 +6,7 @@ import ImageLinkForm from './Components/ImageLinkForm/ImageLinkForm';
 import Rank from './Components/Rank/Rank';
 import Particles from 'react-particles-js';
 import FaceRecognition from './Components/FaceRecognition/FaceRecognition';
+import SignIn from './Components/SignIn/SignIn';
 
 const particlesOptions = {
     particles: {
@@ -25,6 +26,9 @@ class App extends Component {
     super();
     this.state = {
       input: '',
+      imageUrl:'',
+      box: {},
+      route: 'SignIn'
 
     }
   }
@@ -35,10 +39,15 @@ class App extends Component {
     const width = Number(image.width);
     const height = Number(image.height);
     return {
-      leftCol: clarifaiFace.left_col * width;
-      topRow: clarifaiFace.top_row * height;
-      rightCol: width - (clarifaiFace.rightCol * width)
+      leftCol: clarifaiFace.left_col * width,
+      topRow: clarifaiFace.top_row * height,
+      rightCol: width - (clarifaiFace.right_Col * width),
+      bottomRow: height - (clarifaiFace.bottom_Row * height)
     }
+  }
+
+  displayFacebox = (box) =>{
+    this.setState({box: box});
   }
 
   onInputChange = (event) => {
@@ -53,7 +62,7 @@ class App extends Component {
     this.setState({imageUrl: this.state.input});
     console.log('click');
     app.models.predict(Clarifai.FACE_DECTECT_MODEL, this.state.input)
-    .then(response => this.calculateFaceLocation(response))
+    .then(response => this.displayFacebox(this.calculateFaceLocation(response)))
     .catch(err => console.log(err));
 }
 
@@ -65,11 +74,16 @@ class App extends Component {
               params={particlesOptions}
               />
      <Navigation />
+     {this.state.route === SignIn 
+       ? <SignIn />
+       : <div>
      <Logo />
      <Rank />
      <ImageLinkForm onInputChange={this.onInputChange} onButoonSubmit={this.onButtonSubmit}
       />
-     <FaceRecognition imageUrl={this.state.imageUrl}/>  
+     <FaceRecognition box={this.state.box} imageUrl={this.state.imageUrl} /> 
+     </div>
+     }
     </div>
    );
  }
